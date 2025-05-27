@@ -9,18 +9,20 @@ class Pipe extends PositionComponent with HasGameRef<FlappyGame>, CollisionCallb
 
   late RectangleComponent rect;
 
+  bool hasScored = false; // Damit wir nur einmal punkten
+
   Pipe({required Vector2 position, required this.isTop}) {
     this.position = position;
-    size = Vector2(60, 300); // Standardgröße
+    size = Vector2(60, 300);
     anchor = Anchor.topLeft;
   }
 
   @override
   Future<void> onLoad() async {
-    // Farbiges Rechteck hinzufügen (z. B. grün)
+    // Farbiges Rechteck als Pipe (rot)
     rect = RectangleComponent(
       size: size,
-      paint: Paint()..color = Colors.red
+      paint: Paint()..color = Colors.red,
     );
     add(rect);
 
@@ -32,6 +34,14 @@ class Pipe extends PositionComponent with HasGameRef<FlappyGame>, CollisionCallb
   void update(double dt) {
     super.update(dt);
     position.x -= speed * dt;
+
+    // Punkt hinzufügen, wenn der Vogel die Pipe passiert hat
+    if (!hasScored && position.x + size.x < gameRef.bird.x) {
+      hasScored = true;
+      if (!isTop) { // Punkte nur bei der unteren Pipe zählen
+        gameRef.increaseScore();
+      }
+    }
 
     if (position.x + size.x < 0) {
       removeFromParent();

@@ -1,10 +1,12 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame/timer.dart';
 import '../components/bird.dart';
 import '../components/pipe.dart';
+import 'package:flutter/material.dart';
 
 enum GameState { menu, playing, gameOver }
 
@@ -13,6 +15,9 @@ class FlappyGame extends FlameGame with HasCollisionDetection, TapDetector {
   late Timer pipeTimer;
   final Random random = Random();
   GameState state = GameState.menu;
+
+  int score = 0;
+  late TextComponent scoreText;
 
   @override
   Future<void> onLoad() async {
@@ -24,12 +29,35 @@ class FlappyGame extends FlameGame with HasCollisionDetection, TapDetector {
       ..position = Vector2.zero();
     add(background);
 
+    scoreText = TextComponent(
+      text: '0',
+      position: Vector2(20, 20),
+      anchor: Anchor.topLeft,
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Color(0xFFFFFFFF),
+          fontSize: 32,
+        ),
+      ),
+    );
+    add(scoreText);
+
     // Vogel hinzufügen
     bird = Bird();
     add(bird);
 
     // Timer für Pipes
     pipeTimer = Timer(2, onTick: spawnPipes, repeat: true);
+  }
+
+  void increaseScore() {
+    score += 1;
+    scoreText.text = '$score';
+  }
+
+  void resetScore() {
+    score = 0;
+    scoreText.text = '$score';
   }
 
   @override
@@ -50,6 +78,7 @@ class FlappyGame extends FlameGame with HasCollisionDetection, TapDetector {
   void startGame() {
     state = GameState.playing;
     bird.reset();
+    resetScore();
 
     // Vorherige Pipes entfernen
     children.whereType<Pipe>().forEach((pipe) => pipe.removeFromParent());
