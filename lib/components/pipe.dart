@@ -8,8 +8,7 @@ class Pipe extends PositionComponent with HasGameRef<FlappyGame>, CollisionCallb
   final bool isTop;
 
   late RectangleComponent rect;
-
-  bool hasScored = false; // Damit wir nur einmal punkten
+  bool hasScored = false;
 
   Pipe({required Vector2 position, required this.isTop}) {
     this.position = position;
@@ -19,26 +18,44 @@ class Pipe extends PositionComponent with HasGameRef<FlappyGame>, CollisionCallb
 
   @override
   Future<void> onLoad() async {
-    // Farbiges Rechteck als Pipe (rot)
-    rect = RectangleComponent(
-      size: size,
-      paint: Paint()..color = Colors.red,
-    );
-    add(rect);
+    // Pipe-Bild laden
+    final sprite = await gameRef.loadSprite('pipe-green.png');
 
-    // Hitbox für Kollisionen
-    add(RectangleHitbox());
+    // Pipe-Sprite anzeigen
+    final spriteComponent = SpriteComponent(
+      sprite: sprite,
+      size: size,
+      anchor: Anchor.topLeft,
+    );
+
+    // Wenn obere Pipe, dann flippe das Bild vertikal
+    if (isTop) {
+      spriteComponent.scale = Vector2(1, -1); // Vertikal spiegeln
+      spriteComponent.position = Vector2(0, size.y); // Korrektur bei Flip
+    }
+
+    add(spriteComponent);
+
+    // Hitbox hinzufügen (angepasst an die Größe)
+    final hitboxSize = size * 0.97;
+    final offset = (size - hitboxSize) / 2;
+
+    add(RectangleHitbox.relative(
+      Vector2.all(0.98),
+      parentSize: size,
+      position: offset,
+    )..debugMode = false); // Debug anzeigen optional
   }
+
 
   @override
   void update(double dt) {
     super.update(dt);
     position.x -= speed * dt;
 
-    // Punkt hinzufügen, wenn der Vogel die Pipe passiert hat
     if (!hasScored && position.x + size.x < gameRef.bird.x) {
       hasScored = true;
-      if (!isTop) { // Punkte nur bei der unteren Pipe zählen
+      if (!isTop) {
         gameRef.increaseScore();
       }
     }

@@ -12,8 +12,11 @@ class GameOverMenu extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('Game Over', style: TextStyle(fontSize: 30)),
-          const SizedBox(height: 20),
+          Image.asset(
+            'assets/images/gameover.png',
+            width: 200,
+          ),
+          const SizedBox(height: 400),
           ElevatedButton(
             onPressed: () {
               game.reset();
@@ -21,6 +24,10 @@ class GameOverMenu extends StatelessWidget {
               game.overlays.add('MainMenu');
               game.startGame();
             },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              textStyle: const TextStyle(fontSize: 18),
+            ),
             child: const Text('Restart'),
           ),
         ],
